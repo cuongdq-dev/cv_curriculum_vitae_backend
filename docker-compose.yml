@@ -1,12 +1,28 @@
 version: '3.8'
+
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final
+    container_name: cv-curriculum-vitae-backend
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/home/eztub/app
+    restart: unless-stopped
   mongo:
-    image: mongo
-    # environment:
-    #   - PUID=1000
-    #   - PGID=1000
+    image: mongo:latest
+    container_name: cv-mongo
+    environment:
+      MONGO_INITDB_DATABASE: cv_curriculum_vitae
     volumes:
       - ./database:/data/db
     ports:
-      - 27017:27017
+      - '27017:27017'
     restart: unless-stopped

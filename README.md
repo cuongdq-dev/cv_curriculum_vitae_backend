@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
@@ -19,23 +19,17 @@
     <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
   <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
 </p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-# RESTful API with JWT & Swagger built with NestJS
+## Description
+
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Installation
 
 ```bash
-npm install
-```
-
-## Running the mongodb container with docker-compose
-
-```bash
-# up container
-$ docker-compose up -d
-
-# down container
-$ docker-compose down
+$ npm install
 ```
 
 ## Running the app
@@ -51,24 +45,29 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Captures
+## Test
 
-### Swagger UI
+```bash
+# unit tests
+$ npm run test
 
-![Swagger UI](https://github.com/jeanpierm/rest-api-nestjs-mongo/blob/main/captures/1.png?raw=true)
+# e2e tests
+$ npm run test:e2e
 
-### Schemas
+# test coverage
+$ npm run test:cov
+```
 
-![Schemas](https://github.com/jeanpierm/rest-api-nestjs-mongo/blob/main/captures/2.png?raw=true)
+## Support
 
-### Test login endpoint
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
-![Test login endpoint](https://github.com/jeanpierm/rest-api-nestjs-mongo/blob/main/captures/3.png?raw=true)
+## Stay in touch
 
-### Test get user by id endpoint without token
+- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
 
-![Test get user by id endpoint without token](https://github.com/jeanpierm/rest-api-nestjs-mongo/blob/main/captures/5.png?raw=true)
+## License
 
-### Test get user by id endpoint with token
-
-![Test get user by id endpoint with token](https://github.com/jeanpierm/rest-api-nestjs-mongo/blob/main/captures/4.png?raw=true)
+Nest is [MIT licensed](LICENSE).

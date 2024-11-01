@@ -1,67 +1,31 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { NestApplication, NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerCustomOptions, SwaggerModule } from '@nestjs/swagger';
-import { config } from 'dotenv';
+import { Logger } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions } from '@nestjs/microservices';
 import { AppModule } from './app.module';
-import { AppConfig } from './config/app.config';
-import { DatabaseConfig } from './config/database.config';
-import { OpenApiConfig } from './config/open-api.config';
-config();
+import { ConfigService } from './config';
+import { CustomServer } from './server/server';
 
 async function bootstrap() {
-  const context = 'NestApplication';
-  const logger = new Logger(context);
-  const app: NestApplication = await NestFactory.create(AppModule);
-  app.enableCors();
-  const configService = app.get(ConfigService);
-  const appConfig = configService.get<AppConfig>('app');
-  const dbConfig = configService.get<DatabaseConfig>('database');
+  const logger = new Logger('Bootstrap');
+  const app = await NestFactory.create(AppModule, { cors: true });
 
-  app.setGlobalPrefix(appConfig.globalPrefix);
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-    }),
-  );
-  setupOpenAPI(app);
+  app.setGlobalPrefix('api');
+  const port = ConfigService.getInstance().getNumber('PORT') || 30090;
+  const host = ConfigService.getInstance().get('HOST') || 'localhost';
 
-  app.setGlobalPrefix(appConfig.globalPrefix);
-  const server = await app.listen(appConfig.http.port, appConfig.http.host);
-  if (appConfig.env === 'production') {
-    server.setTimeout(appConfig.timeout);
+  await app.listen(port, host, () => {
+    logger.log(`Application is running on http://${host}:${port}`);
+  });
+
+  const customerServerHost = ConfigService.getInstance().get('CUSTOM_SERVER_HOST');
+  const customServerPort = ConfigService.getInstance().getNumber('CUSTOM_SERVER_PORT');
+
+  if (customerServerHost && customServerPort) {
+    app.connectMicroservice<MicroserviceOptions>({
+      strategy: new CustomServer(customServerPort, customerServerHost)
+    });
+
+    await app.startAllMicroservices();
   }
-
-  logger.debug(`Server environment set to ${appConfig.env}`);
-  logger.log(`Database running on ${dbConfig.host}/${dbConfig.name}`);
-  logger.log(`Server running on ${await app.getUrl()}`);
 }
 bootstrap();
-
-/**
- * Setup config for OpenAPI (Swagger)
- * @param app NestJS application
- */
-function setupOpenAPI(app: NestApplication) {
-  const configService = app.get(ConfigService);
-  const openApiConfig = configService.get<OpenApiConfig>('open-api');
-  const appConfig = configService.get<AppConfig>('app');
-
-  const config = new DocumentBuilder()
-    .setTitle(openApiConfig.title)
-    .setDescription(openApiConfig.description)
-    .setVersion(openApiConfig.version)
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config, {
-    extraModels: [],
-  });
-  const options: SwaggerCustomOptions = {
-    swaggerOptions: {
-      filter: true,
-      showRequestDuration: true,
-    },
-  };
-  SwaggerModule.setup(`${appConfig.globalPrefix}`, app, document, options);
-}
