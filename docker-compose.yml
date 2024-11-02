@@ -3,7 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: final
     container_name: cv-curriculum-vitae-backend
     env_file: .env
     environment:
