@@ -32,21 +32,3 @@ COPY --from=dist dist /home/cv-backend/app/dist
 COPY --from=node_modules node_modules /home/cv-backend/app/node_modules
 
 CMD yarn "start:prod"
-
-# Second stage: Setup NGINX
-FROM nginx:latest
-
-# Remove default NGINX configuration
-RUN rm -rf /etc/nginx/conf.d/default.conf
-
-# Copy custom NGINX configuration for the backend
-COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Copy the application from the builder stage
-COPY --from=builder /usr/src/app /usr/src/app
-
-# Expose port 80 for NGINX
-EXPOSE 80
-
-# Start NGINX
-CMD ["nginx", "-g", "daemon off;"]
