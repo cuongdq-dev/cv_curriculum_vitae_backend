@@ -1,34 +1,38 @@
-FROM node:14-alpine AS base
+# Use Node.js image as base
+FROM node:latest AS builder
 
-COPY package.json yarn.lock ./
-RUN yarn
+# Set working directory
+WORKDIR /usr/src/app
 
-FROM base AS dist
-COPY . ./
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-RUN yarn build
+# Install dependencies
+RUN npm install
 
-FROM base as node_modules
+# Copy the rest of the application code
+COPY . .
 
-RUN npm prune --production
-RUN rm -rf node_modules/rxjs/src/
-RUN rm -rf node_modules/rxjs/bundles/
-RUN rm -rf node_modules/rxjs/_esm5/
-RUN rm -rf node_modules/rxjs/_esm2015/
-RUN rm -rf node_modules/swagger-ui-dist/*.map
-RUN rm -rf node_modules/couchbase/src/
+# Expose the port your app runs on
+EXPOSE 3000
 
-FROM node:14-alpine as final
+# Command to run the application
+CMD ["npm", "run", "start:prod"]
 
-RUN addgroup -S cv-backend && adduser -S cv-backend -G cv-backend
-USER cv-backend
+# Second stage: Setup NGINX
+FROM nginx:latest
 
-RUN mkdir -p /home/cv-backend/app
+# Remove default NGINX configuration
+RUN rm -rf /etc/nginx/conf.d/default.conf
 
-WORKDIR /home/cv-backend/app
+# Copy custom NGINX configuration for the backend
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
-COPY --from=base package.json /home/cv-backend/app/package.json
-COPY --from=dist dist /home/cv-backend/app/dist
-COPY --from=node_modules node_modules /home/cv-backend/app/node_modules
+# Copy the application from the builder stage
+COPY --from=builder /usr/src/app /usr/src/app
 
-CMD yarn "start:prod"
+# Expose port 80 for NGINX
+EXPOSE 80
+
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]
