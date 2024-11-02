@@ -1,22 +1,37 @@
 FROM node:14-alpine AS base
 
-# Set working directory
-WORKDIR /usr/src/app
+COPY package.json yarn.lock ./
+RUN yarn
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+FROM base AS dist
+COPY . ./
 
-# Install dependencies
-RUN npm install
+RUN yarn build
 
-# Copy the rest of the application code
-COPY . .
+FROM base as node_modules
 
-# Expose the port your app runs on
-EXPOSE 3000
+RUN npm prune --production
+RUN rm -rf node_modules/rxjs/src/
+RUN rm -rf node_modules/rxjs/bundles/
+RUN rm -rf node_modules/rxjs/_esm5/
+RUN rm -rf node_modules/rxjs/_esm2015/
+RUN rm -rf node_modules/swagger-ui-dist/*.map
+RUN rm -rf node_modules/couchbase/src/
 
-# Command to run the application
-CMD ["npm", "run", "start:prod"]
+FROM node:14-alpine as final
+
+RUN addgroup -S cv-backend && adduser -S cv-backend -G cv-backend
+USER cv-backend
+
+RUN mkdir -p /home/cv-backend/app
+
+WORKDIR /home/cv-backend/app
+
+COPY --from=base package.json /home/cv-backend/app/package.json
+COPY --from=dist dist /home/cv-backend/app/dist
+COPY --from=node_modules node_modules /home/cv-backend/app/node_modules
+
+CMD yarn "start:prod"
 
 # Second stage: Setup NGINX
 FROM nginx:latest
