@@ -1,4 +1,4 @@
-FROM node:14-alpine AS base
+FROM node:latest AS builder
 
 COPY package.json yarn.lock ./
 RUN yarn
@@ -18,7 +18,7 @@ RUN rm -rf node_modules/rxjs/_esm2015/
 RUN rm -rf node_modules/swagger-ui-dist/*.map
 RUN rm -rf node_modules/couchbase/src/
 
-FROM node:14-alpine as final
+FROM node:latest AS final
 
 RUN addgroup -S cv-backend && adduser -S cv-backend -G cv-backend
 USER cv-backend
