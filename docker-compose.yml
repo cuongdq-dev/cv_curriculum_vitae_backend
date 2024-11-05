@@ -6,7 +6,7 @@ services:
     env_file: .env
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3001
     ports:
-      - "3000:3000" # Ánh xạ cổng 3000 của container đến cổng 3000 của máy chủ
+      - "3001:3001" # Ánh xạ cổng 3000 của container đến cổng 3000 của máy chủ
     restart: unless-stopped
